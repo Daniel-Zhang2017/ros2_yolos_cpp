@@ -188,28 +188,151 @@ Nodes can be configured via launch arguments or a YAML parameter file. See `conf
 
 ## 🐳 Docker
 
-Run the stack without installing dependencies locally.
+# 🐳 Docker
+
+Run the stack without installing dependencies locally. The provided `Dockerfile` uses [USTC mirrors](https://mirrors.ustc.edu.cn/) for fast package installation in China.
+
+## Build the image
+
 ```bash
 # Make the build script executable
 chmod +x docker_build.sh
-```
-```bash
+
 # Build for ROS 2 Humble
 ./docker_build.sh humble
-```
-```bash
+
 # ...or for ROS 2 Jazzy
 ./docker_build.sh jazzy
 ```
+
+The first build installs all dependencies (a few minutes). Subsequent builds reuse the Docker layer cache and only recompile your code (seconds).
+
+## Run
+
+### Basic (CPU)
+
 ```bash
-# Run with GPU support
-docker run --gpus all -it --rm \
+docker run --rm -it \
     -v /path/to/models:/models \
     ros2_yolos_cpp \
     ros2 launch ros2_yolos_cpp detector.launch.py model_path:=/models/yolov8n.onnx
 ```
 
+### With GPU
+
+```bash
+docker run --gpus all --rm -it \
+    -v /path/to/models:/models \
+    ros2_yolos_cpp \
+    ros2 launch ros2_yolos_cpp detector.launch.py model_path:=/models/yolov8n.onnx
+```
+
+### With live workspace (edit code on host, rebuild in container)
+
+```bash
+docker run --rm -it --network=host \
+    -v "$(pwd):/ros2_ws/src/ros2_yolos_cpp" \
+    -w /ros2_ws \
+    ros2_yolos_cpp bash
+```
+
+Then inside the container:
+
+```bash
+source /opt/ros/humble/setup.bash
+colcon build --packages-select ros2_yolos_cpp
+source install/setup.bash
+ros2 launch ros2_yolos_cpp detector.launch.py
+```
+
+### With a USB camera
+
+```bash
+docker run --rm -it --network=host \
+    --device=/dev/video0 \
+    -v /path/to/models:/models \
+    ros2_yolos_cpp \
+    ros2 launch ros2_yolos_cpp detector.launch.py
+```
+
+### With GUI (RViz / rqt)
+
+```bash
+xhost +local:docker
+
+docker run --rm -it --network=host \
+    -e DISPLAY=$DISPLAY \
+    -e QT_X11_NO_MITSHM=1 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    ros2_yolos_cpp \
+    rviz2
+```
+
+## Full example (GPU + host network + GUI)
+
+```bash
+docker run --rm -it \
+    --name yolos_run \
+    --gpus all \
+    --network=host \
+    --ipc=host \
+    --shm-size=2g \
+    -e ROS_DOMAIN_ID=0 \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    -v /path/to/models:/models:ro \
+    -v "$(pwd)/config:/config:ro" \
+    ros2_yolos_cpp \
+    ros2 launch ros2_yolos_cpp detector.launch.py \
+        model_path:=/models/yolov8n.onnx \
+        params_file:=/config/params.yaml
+```
+
+## Flag reference
+
+| Flag | Purpose |
+|---|---|
+| `--rm` | Auto-delete container on exit |
+| `-it` | Interactive + TTY |
+| `-d` | Detached (run in background) |
+| `--name` | Give container a name |
+| `--gpus all` | Enable NVIDIA GPUs |
+| `--network=host` | Share host network (needed for ROS 2 DDS discovery) |
+| `--ipc=host` | Share host IPC (helps OpenCV / large shared memory) |
+| `--shm-size=2g` | Increase `/dev/shm` (if not using `--ipc=host`) |
+| `-v host:container` | Mount a volume |
+| `-v ...:ro` | Read-only mount |
+| `-w /path` | Set working directory inside the container |
+| `-e VAR=value` | Set an environment variable |
+| `--device=/dev/video0` | Pass through a device (e.g. camera) |
+| `-e DISPLAY=$DISPLAY` | GUI display forwarding |
+
+## Notes
+
+> [!NOTE]
+> GPU support requires the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and a compatible NVIDIA driver. Drop `--gpus all` to run on CPU.
+
+> [!TIP]
+> Use `--network=host` if you want ROS 2 nodes on the host and inside the container to discover each other automatically.
+
+> [!WARNING]
+> `xhost +local:docker` relaxes X11 access control. Revert with `xhost -local:docker` when done.
+
+## Cleanup
+
+```bash
+docker ps -a                 # list all containers
+docker rm <container_id>     # remove one
+docker rm $(docker ps -aq)   # remove all stopped containers
+
+docker images                # list images
+docker rmi ros2_yolos_cpp    # remove image
+docker system prune -a       # nuke unused images / containers / networks
+```
+
 ---
+
+## 📄 License
 
 ## 📄 License
 
