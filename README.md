@@ -336,13 +336,13 @@ docker exec -it <id> bash
 # look inside
 ps aux | grep apt
 cat /etc/apt/sources.list
-
+```
 ## 📄 License
 
 ## 📄 License
 
 This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See [LICENSE](LICENSE) for details.
 
-<p align="center">
+
   Made with ❤️ by the <a href="https://github.com/Geekgineer/YOLOs-CPP">YOLOs-CPP Team</a>
 </p>
