@@ -337,9 +337,6 @@ docker exec -it <id> bash
 ps aux | grep apt
 cat /etc/apt/sources.list
 
-
----
-
 ## 📄 License
 
 ## 📄 License
