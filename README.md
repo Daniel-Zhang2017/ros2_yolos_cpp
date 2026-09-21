@@ -190,9 +190,10 @@ Nodes can be configured via launch arguments or a YAML parameter file. See `conf
 
 Run the stack without installing dependencies locally.
 
-```bash
-# Build Docker image
-docker build -t ros2_yolos_cpp .
+chmod +x docker_build.sh
+./docker_build.sh humble
+# 或
+./docker_build.sh jazzy
 
 # Run with GPU support
 docker run --gpus all -it --rm \
