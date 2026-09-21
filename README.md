@@ -337,7 +337,7 @@ docker exec -it <id> bash
 ps aux | grep apt
 cat /etc/apt/sources.list
 ```
-Docker part is updated by Dan Z.
+**Docker part is updated by Dan Z.**
 
 ## 📄 License
 
