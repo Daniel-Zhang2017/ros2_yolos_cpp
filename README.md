@@ -190,10 +190,13 @@ Nodes can be configured via launch arguments or a YAML parameter file. See `conf
 
 Run the stack without installing dependencies locally.
 
+# Make the build script executable
 chmod +x docker_build.sh
 
+# Build for ROS 2 Humble
 ./docker_build.sh humble
-# or
+
+# ...or for ROS 2 Jazzy
 ./docker_build.sh jazzy
 
 # Run with GPU support
