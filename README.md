@@ -329,6 +329,14 @@ docker images                # list images
 docker rmi ros2_yolos_cpp    # remove image
 docker system prune -a       # nuke unused images / containers / networks
 ```
+## open another terminal and check
+```bash
+docker ps                      # find the container ID
+docker exec -it <id> bash
+# look inside
+ps aux | grep apt
+cat /etc/apt/sources.list
+
 
 ---
 
