@@ -1,49 +1,42 @@
 #!/bin/bash
-# Build ros2_yolos_cpp in a ROS 2 Humble Docker container
+# Build ros2_yolos_cpp in a ROS 2 Docker container (Dockerfile version)
 # Usage: ./docker_build.sh [humble|jazzy]
 
 set -e
 
 ROS_DISTRO="${1:-humble}"
-IMAGE="ros:${ROS_DISTRO}-ros-base"
+IMAGE="ros2_yolos_builder:${ROS_DISTRO}"
 WORKSPACE_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=========================================="
 echo "Building ros2_yolos_cpp in Docker"
 echo "ROS Distro: ${ROS_DISTRO}"
-echo "Workspace: ${WORKSPACE_DIR}"
+echo "Workspace:  ${WORKSPACE_DIR}"
+echo "APT mirror: USTC (mirrors.ustc.edu.cn)"
 echo "=========================================="
 
-# Pull the image if needed
-docker pull ${IMAGE}
+# ---- 1. 构建（或复用）镜像 ----
+echo ">>> Building docker image (${IMAGE})..."
+DOCKER_BUILDKIT=1 docker build \
+    --build-arg ROS_DISTRO="${ROS_DISTRO}" \
+    -t "${IMAGE}" \
+    -f "${WORKSPACE_DIR}/Dockerfile" \
+    "${WORKSPACE_DIR}"
 
-# Run build in container
+# ---- 2. 在容器里编译 ----
+echo ">>> Running colcon build..."
 docker run --rm -it \
+    --network=host \
     -v "${WORKSPACE_DIR}:/ros2_ws/src/ros2_yolos_cpp:rw" \
     -w /ros2_ws \
-    ${IMAGE} \
+    "${IMAGE}" \
     /bin/bash -c "
         set -e
-        echo '>>> Installing dependencies...'
-        apt-get update -qq
-        apt-get install -y -qq \
-            build-essential \
-            cmake \
-            libopencv-dev \
-            curl \
-            ros-${ROS_DISTRO}-image-transport \
-            ros-${ROS_DISTRO}-vision-msgs \
-            ros-${ROS_DISTRO}-cv-bridge \
-            ros-${ROS_DISTRO}-rclcpp-components \
-            ros-${ROS_DISTRO}-lifecycle > /dev/null
-
-        echo '>>> Sourcing ROS 2...'
         source /opt/ros/${ROS_DISTRO}/setup.bash
-
-        echo '>>> Building with colcon...'
+        echo '>>> colcon build...'
         colcon build --packages-select ros2_yolos_cpp \
             --cmake-args -DCMAKE_BUILD_TYPE=Release \
             --event-handlers console_direct+
-
         echo '>>> Build complete!'
+        echo '>>> Install dir: /ros2_ws/install (mapped to ${WORKSPACE_DIR}/install)'
     "
