@@ -233,7 +233,8 @@ docker run --gpus all --rm -it \
 docker run --rm -it --network=host \
     -v "$(pwd):/ros2_ws/src/ros2_yolos_cpp" \
     -w /ros2_ws \
-    ros2_yolos_cpp bash
+    ros2_yolos_builder:humble \
+    bash
 ```
 
 Then inside the container:
