@@ -207,7 +207,7 @@ chmod +x docker_build.sh
 
 The first build installs all dependencies (a few minutes). Subsequent builds reuse the Docker layer cache and only recompile your code (seconds).
 
-## You can also directly pull the image using the code below.## 
+## You can also directly pull the image using the code below.
 
 ```bash
 docker push hhzhang6/ros2_yolos_builder:tagname
