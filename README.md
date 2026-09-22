@@ -6,7 +6,7 @@
 <h3 align="center">High-Performance ROS 2 Wrapper for YOLO Inference</h3>
 
 <p align="center">
-  <em>Production-grade, lifecycle-managed ROS 2 nodes for Object Detection, Segmentation, Pose, OBB, and Classification using <a href="https://github.com/Geekgineer/YOLOs-CPP">YOLOs-CPP</a>.</em>
+  <em>Production-grade, lifecycle-managed ROS 2 nodes for Object Detection, Segmentation, Pose, OBB, and Classification using <a href="[https://github.com/Geekgineer/YOLOs-CPP](https://github.com/Daniel-Zhang2017/ros2_yolos_cpp.git)">YOLOs-CPP</a>.</em>
 </p>
 
 <p align="center">
@@ -69,7 +69,7 @@
 mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
 
 # Clone package
-git clone https://github.com/Geekgineer/ros2_yolos_cpp.git
+git clone https://github.com/Daniel-Zhang2017/ros2_yolos_cpp.git
 
 # Install dependencies
 cd ~/ros2_ws
